@@ -1,0 +1,119 @@
+We performed classification experiments on LSA16, RWTH and CIARP  handshape datasets. For each experiment, we split the dataset in training and test sets, with the latter taking 33\% of the samples.  The split was stratified,  maintaining the proportion of samples of each class in both sets.
+
+We applied normalization feature-wise substracting the mean and dividing by the standard deviation of each feature. For data augmentation we used horizontal flipping, a 10 and 30 degree rotation and a resampling of the images creating new versions of them with a different size reducing each image by 10\% and 20\% in width and height. We found that a 10 degree rotation gave better results because a rotation of 30 degrees showed to be too high for the nature of the datasets.
+
+We made multiple experiments with Prototypical Networks and DenseNet to find out which hyperparameter configuration was the best for each dataset: with and without data augmentation. We describe the hyper parameters for each model/dataset combination.
+
+\subsection{Prototypical Network}
+
+As mentioned in section \ref{models:protonet}, we can use Prototypical Networks' ability to work with small datasets even if all samples are labeled.
+
+Therefor we experimented with Prototypical Networks using an embedding architecture composed of four convolutional blocks. Each block comprises a \{64, 128\}-filter $3 x 3$ convolution, batch normalization layer, a ReLU nonlinearity and a $2 x 2$ max-pooling layer.
+
+We used the same encoder for embedding both support and query points. All of our models were trained  with the ADAM\cite{Adam} optimizer. We used an initial learning rate of $10^{-3}$ and cut the learning rate in half every 2000 episodes.
+
+We trained prototypical networks using Euclidean distance in the 1-shot and 5-shot scenarios with training episodes containing 16, 20 and 10 classes (for LSA16, RWTH and CIARP respectively) and 5 query points per class. We found it advantageous to match the same value of n for train and test scenarios, and to use a higher value of k (more classes) per training episode. We computed classification accuracy for our models by averaging over 1000 randomly generated episodes from the test set.
+
+In the experiments performed with RWTH we used the same four-block embedding architecture by adding an eight-block architecture with the same layer composition with the idea of analyzing the need to increase the size of the network given the difficulty of the dataset. The difference in the results obtained in 1-shot and 5-shot scenarios for this dataset was very large. We found that 5-shot scenarios gave better results. Using this discovery we only used 5-shot learning in the remaining experiments.
+
+The best configurations for all datasets is the 5-shot scenario with equals training-shot and test-shot by using more than or equal to 5 classes per training episode. Better results were obtained when the number of classes approaches the total amount of classes in the dataset except on CIARP where the best results were obtained when the number of classes per training episode is 5. In addition, the best configurations of the embedding architecture is a 64-filter for all datasets.
+
+\subsection{Wide-DenseNet}
+
+We employed a variation on DenseNet called Wide-DenseNet which follows the strategy used by wide residual networks.\cite{He2015DeepRL}.
+
+We employed a Wide-DenseNet including SE blocks after each dense and transition block. We performed a grid search of hyperparameters to find the model with the best accuracy, averaged over all datasets. We tried growth rate values of 32, 64 and 128 and depth of dense layers of no more than [6,12,24,16], where each number represents the number of dense blocks.
+
+We trained the models using a batch size of 16, an initial learning rate of $10^{-3}$ with categorical cross entropy optimizer and 400 epochs with a maximum patience of 25. The resulting model used a growth rate of 32 and two dense blocks with 6 and 12 layers respectively,  for all datasets.
+
+\subsection{Results}
+
+In table \ref{tab:results}, we can observe that all models have a lower accuracy on the RWTH dataset, which is expected since it has more classes, unsegmented hand images and class imbalances. Prototypical Networks have similar accuracy for LSA16 and CIARP datasets beating the rest of the models, also expected since both datasets have very few examples. For LSA16 they achieve better accuracy than VGG16 and DenseNet; and for CIARP they achieve similar or better accuracy than LeNet CNN and DenseNet. The accuracy of DenseNet on the RWTH is slightly bigger than for other models. We believe that the low accuracy obtained by Prototypical Networks is due to the fact that the images do not only have hands and could be improved if the images of the hands were segmented as in the rest of the datasets. It should be noted that the use of data augmentation did not bring significant improvements in the accuracy obtained in LSA16 and CIARP.
+
+Another fact to consider is that better results were obtained with those parameters that reduced the size of the architectures.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{ p{18em} p{7em} p{8em} p{8em}}
+\toprule
+\emph{Method} & \emph{LSA16} &  \emph{RWTH}  &  \emph{CIARP} \\ \midrule
+LeNet \cite{ciarp2018} & - & - & 99.20  \\
+Inception (fine-tuning) \cite{koller16} & - & 85.50 \\
+VGG16 \cite{quiroga2017study} & 95.92 & 82.88 \\
+Inception+SVM (pre-trained) \cite{quiroga2017study} &  93.67 & 78.12 & - \\
+DenseNet  & 93.79 & 86.23 & 99.87 \\
+Prototypical Networks  & 97.86 & 75.23 & 99.96 \\
+DenseNet ++  & 96.45 & \textbf{89.51} & 99.95 \\
+Prototypical Networks ++ & \textbf{97.99} & 75.94 & \textbf{99.99}  \\
+% DenseNet + Unlabeled \cite{} & NN.NN & NN.NN \\
+% Prototypical Networks + Unlabeled \cite{} & NN.NN & NN.NN \\
+\bottomrule
+\end{tabular}
+\caption{Accuracy of various convolutional neural network models on three datasets: LSA16 \cite{Ronchetti2016}, handshapes from RWTH \cite{koller16:deephand} and CIARP \cite{ciarp2018}. Models with "++" used data augmentation as described in this section. \label{tab:results}}.
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{ p{15em} p{7em} p{8em}}
+\toprule
+\emph{Method} & \emph{Train size} & \emph{Accuracy} \\ \midrule
+DenseNet \cite{densenet} & 75\% & 99.99 \\
+DenseNet \cite{densenet} & 50\% & 99.84 \\
+DenseNet \cite{densenet} & 33\% & 99.76 \\
+Prototypical Networks \cite{protonet} & 75\% & 99.78 \\
+Prototypical Networks \cite{protonet} & 50\% & 100.00 \\
+Prototypical Networks \cite{protonet} & 33\% & 99.97 \\
+DenseNet ++ \cite{densenet} & 75\% & 100.00 \\
+DenseNet ++ \cite{densenet} & 50\% & 99.90 \\
+DenseNet ++ \cite{densenet} & 33\% & 99.86 \\
+Prototypical Networks ++ \cite{protonet} & 75\% & 99.85 \\
+Prototypical Networks ++ \cite{protonet} & 50\% & 100.00 \\
+Prototypical Networks ++ \cite{protonet} & 33\% & 99.99 \\
+\bottomrule
+\end{tabular}
+\label{tab:results_reduced_ciarp}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{ p{15em} p{7em} p{8em}}
+\toprule
+\emph{Method} & \emph{Train size} & \emph{Accuracy} \\ \midrule
+DenseNet \cite{densenet} & 75\% & 99.07 \\
+DenseNet \cite{densenet} & 50\% & 92.97 \\
+DenseNet \cite{densenet} & 33\% & 89.87 \\
+Prototypical Networks \cite{protonet} & 75\% & 99.10 \\
+Prototypical Networks \cite{protonet} & 50\% & 99.25 \\
+Prototypical Networks \cite{protonet} & 33\% & 98.99 \\
+DenseNet ++ \cite{densenet} & 75\% & 99.10 \\
+DenseNet ++ \cite{densenet} & 50\% & 94.64 \\
+DenseNet ++ \cite{densenet} & 33\% & 90.18 \\
+Prototypical Networks ++ \cite{protonet} & 75\% & 99.20 \\
+Prototypical Networks ++ \cite{protonet} & 50\% & 99.40 \\
+Prototypical Networks ++ \cite{protonet} & 33\% & 99.15 \\
+\bottomrule
+\end{tabular}
+\label{tab:results_reduced_lsa16}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{ p{15em} p{7em} p{8em}}
+\toprule
+\emph{Method} & \emph{Train size} & \emph{Accuracy} \\ \midrule
+DenseNet \cite{densenet} & 75\% & 95.10 \\
+DenseNet \cite{densenet} & 50\% & 88.75 \\
+DenseNet \cite{densenet} & 33\% & 85.76 \\
+Prototypical Networks \cite{protonet} & 75\% & 79.90 \\
+Prototypical Networks \cite{protonet} & 50\% & 78.50 \\
+Prototypical Networks \cite{protonet} & 33\% & 76.89 \\
+DenseNet ++ \cite{densenet} & 75\% & 96.00 \\
+DenseNet ++ \cite{densenet} & 50\% & 89.56 \\
+DenseNet ++ \cite{densenet} & 33\% & 87.50 \\
+Prototypical Networks ++ \cite{protonet} & 75\% & 80.85 \\
+Prototypical Networks ++ \cite{protonet} & 50\% & 80.35 \\
+Prototypical Networks ++ \cite{protonet} & 33\% & 79.99 \\
+\bottomrule
+\end{tabular}
+\label{tab:results_reduced_rwth}
+\end{table}
