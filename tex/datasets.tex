@@ -4,12 +4,24 @@
 
 The dataset is highly imbalanced with some classes having just 1 sample while others have as many as 529 samples. We removed classes that had less than 20 samples following \cite{quiroga2017study}, to guarantee a minimum amount of images per class for the networks to learn.
 
-\subsubsection{CIARP} \cite{ciarp2018} contains 6000 images of size 38x38 adquired by a single color camera. The images were manually labeled and correspond to 10 classes of hand gestures. The hands are centered and were segmented from the background, which was replaced by black pixels. The small size of the images and low amount of classes give this dataset lower complexity compared to LSA16 and RWTH.  The  classes in the data set correspond to handshapes  not based on sign language, but are similar enough  that the comparison remains valid.
+\subsubsection{CIARP} \cite{ciarp2018} contains 6000 images of size 38x38 acquired by a single color camera. The images were manually labeled and correspond to 10 classes of hand gestures. The hands are centered and were segmented from the background, which was replaced by black pixels. The small size of the images and low amount of classes give this dataset lower complexity compared to LSA16 and RWTH.  The classes in the data set correspond to handshapes  not based on sign language, but are similar enough  that the comparison remains valid.
 
 % TODO add reference to this figure in each datasets subsection
 \begin{figure}
     \centering
-    \includegraphics[width=0.8\textwidth]{datasets/samples.png}
+    \begin{tabular}{ccccc}
+        \includegraphics[height=3em,width=10mm]{datasets/lsa161.png} &
+        \includegraphics[height=3em,width=10mm]{datasets/lsa162.png} &
+        \includegraphics[height=3em,width=10mm]{datasets/lsa163.png} &
+        \includegraphics[height=3em,width=10mm]{datasets/lsa164.png} &
+        \includegraphics[height=3em,width=10mm]{datasets/lsa165.png} \\
+        \multicolumn{5}{c}{\includegraphics[width=17em]{datasets/rwth2.png}} \\
+        \includegraphics[height=3em,width=10mm]{datasets/ciarp1.png} &
+        \includegraphics[height=3em,width=10mm]{datasets/ciarp5.png} &
+        \includegraphics[height=3em,width=10mm]{datasets/ciarp3.png} &
+        \includegraphics[height=3.01em,width=10mm]{datasets/ciarp4.png} &
+        \includegraphics[height=3em,width=10mm]{datasets/ciarp5.png} \\
+    \end{tabular}
     \caption{Sample images from the LSA16 (first row), RWTH-PHOENIX-Weather (second row) and CIARP (third row) datasets.}
     \label{fig:datasets}
 \end{figure}
